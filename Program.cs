@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SampleWebApp.Model; // Make sure to use your correct namespace
+using SampleWebApp.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,14 +15,25 @@ if (!string.IsNullOrEmpty(keyVaultName))
 // Register DAL as a service
 builder.Services.AddSingleton<DAL>();
 
+// Add services to the container
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
-
-// Example endpoint to demonstrate usage of DAL
-app.MapGet("/users", (DAL dal, IConfiguration config) =>
+// Configure the HTTP request pipeline
+if (!app.Environment.IsDevelopment())
 {
-    return dal.GetUsers(config);
-});
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.Run();
